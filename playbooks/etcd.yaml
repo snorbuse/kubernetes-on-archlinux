@@ -33,7 +33,7 @@
     copy: src=../cert/etcd.pem dest=/etc/etcd/
   - name: installing etcd cert key 
     become: yes
-    copy: src=../cert/etc-key.pem dest=/etc/etcd/
+    copy: src=../cert/etcd-key.pem dest=/etc/etcd/
   - name: installing systemd file
     become: yes
     template: src=../template/etcd/etcd.service.j2 dest=/etc/systemd/system/etcd.service

@@ -3,11 +3,11 @@ Description=etcd
 Documentation=https://github.com/coreos
 
 [Service]
-ExecStart=/usr/bin/etcd --name controller01 \
-  --cert-file=/etc/etcd/device.crt \
-  --key-file=/etc/etcd/device.key \
-  --peer-cert-file=/etc/etcd/device.crt \
-  --peer-key-file=/etc/etcd/device.key \
+ExecStart=/usr/bin/etcd --name {{ansible_fqdn}} \
+  --cert-file=/etc/etcd/etcd.pem \
+  --key-file=/etc/etcd/etcd-key.pem \
+  --peer-cert-file=/etc/etcd/etcd.pem \
+  --peer-key-file=/etc/etcd/etcd-key.pem \
   --trusted-ca-file=/etc/etcd/rootCA.pem \
   --peer-trusted-ca-file=/etc/etcd/rootCA.pem \
   --initial-advertise-peer-urls https://{{ ansible_default_ipv4.address }}:2380 \
@@ -15,7 +15,7 @@ ExecStart=/usr/bin/etcd --name controller01 \
   --listen-client-urls https://{{ ansible_default_ipv4.address }}:2379,http://127.0.0.1:2379 \
   --advertise-client-urls https://{{ ansible_default_ipv4.address }}:2379 \
   --initial-cluster-token etcd-cluster-0 \
-  --initial-cluster controller01=https://etcd01:2380,controller02=https://etcd02:2380 
+  --initial-cluster etcd01=https://etcd01:2380,etcd02=https://etcd02:2380 \
   --initial-cluster-state new \
   --data-dir=/var/lib/etcd
 #  --initial-cluster ETCD_NAME_1=https://etcd01:2380,ETCD_NAME_2=https://etcd02:2380 \
