@@ -1,4 +1,6 @@
 #!/bin/bash
+mkdir cert
+
 echo "Creating CA key"
 openssl genrsa -out cert/rootCA.key 2048 2> /dev/null
 
