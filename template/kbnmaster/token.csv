@@ -1,0 +1,3 @@
+secretPassW0rd,admin,admin
+secretPassW0rd,scheduler,scheduler
+secretPassW0rd,kubelet,kubelet
