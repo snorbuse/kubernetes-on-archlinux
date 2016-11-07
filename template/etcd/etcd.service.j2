@@ -3,7 +3,7 @@ Description=etcd
 Documentation=https://github.com/coreos
 
 [Service]
-ExecStart=/usr/bin/etcd --name {{ansible_fqdn}} \
+ExecStart=/usr/bin/etcd --name {{inventory_hostname}} \
   --cert-file=/etc/etcd/etcd.pem \
   --key-file=/etc/etcd/etcd-key.pem \
   --peer-cert-file=/etc/etcd/etcd.pem \
