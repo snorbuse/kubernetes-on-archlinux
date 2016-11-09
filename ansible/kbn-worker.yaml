@@ -1,0 +1,9 @@
+---
+# This playbook deploys the Kubernetes master nodes
+
+- name: Configure and deploy the Kubernetes worker nodes
+  hosts: worker
+  become_method: sudo
+  roles:
+    - docker
+    - worker

@@ -1,0 +1,8 @@
+# Handler for the docker plays
+
+- name: restart docker
+  become: yes
+  systemd:
+    name: docker
+    state: restarted
+    daemon_reload: yes

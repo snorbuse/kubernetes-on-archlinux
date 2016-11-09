@@ -1,0 +1,28 @@
+---
+# This playbook will install Docker
+
+- name: Download docker binaries
+  unarchive: 
+    src: "https://get.docker.com/builds/Linux/x86_64/docker-1.12.1.tgz"
+    remote_src: yes
+    dest: /tmp/
+    creates: /usr/bin/docker
+
+
+- name: Install Docker binaries
+  become: yes
+  copy: 
+    remote_src: yes
+    src: "{{ item }}"
+    dest: /usr/bin
+    mode: "u+x"
+  with_fileglob:
+  - /tmp/docker/docker*
+
+
+- name: Create Docker systemd configuration file
+  become: yes
+  notify: restart docker
+  template:
+    src: ../files/docker.service
+    dest: /etc/systemd/system/docker.service

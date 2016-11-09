@@ -1,0 +1,17 @@
+---
+# Handlers for Kubernetes worker.
+
+# Start systemd
+- name: restart kubelet
+  become: yes
+  systemd: 
+    state: restarted 
+    name: kubelet
+    daemon_reload: yes
+
+
+- name: restart kube-proxy
+  become: yes
+  systemd: 
+    state: restarted 
+    name: kube-proxy

@@ -1,5 +1,0 @@
----
-- include: playbooks/hosts.yaml
-- include: playbooks/etcd.yaml
-- include: playbooks/kbnmaster.yaml
-- include: playbooks/worker.yaml

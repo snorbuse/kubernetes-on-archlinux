@@ -1,0 +1,69 @@
+---
+# This playbook installs etcd
+
+- name: Download the Etcd binaries
+  unarchive: 
+    src: "https://github.com/coreos/etcd/releases/download/v3.0.10/etcd-v3.0.10-linux-amd64.tar.gz" 
+    remote_src: yes 
+    dest: /tmp 
+    creates: /usr/bin/etcd
+
+- name: Install the etcd binary
+  become: yes
+  copy: 
+    remote_src: yes 
+    src: /tmp/etcd-v3.0.10-linux-amd64/etcd 
+    dest: /usr/bin/etcd 
+    mode: "a+x"
+
+
+- name: Install the etcdctl binary
+  become: yes
+  copy: 
+    remote_src: yes 
+    src: /tmp/etcd-v3.0.10-linux-amd64/etcdctl 
+    dest: /usr/bin/etcdctl 
+    mode: "a+x"
+
+
+# Creating directories
+- name: Create Etcd configuration directory
+  become: yes
+  file: 
+    path: /etc/etcd
+    state: directory
+
+- name: Create the Etcd data directory
+  become: yes
+  file: 
+    path: /var/lib/etcd
+    state: directory
+
+
+# Installing certificates
+- name: Install the CA certificate
+  become: yes
+  copy: 
+    src: rootCA.pem 
+    dest: /etc/etcd/
+
+- name: Install the Etcd certificate
+  become: yes
+  copy: 
+    src: etcd.pem 
+    dest: /etc/etcd/
+
+- name: Install the Etcd certificate key
+  become: yes
+  copy: 
+    src: etcd-key.pem 
+    dest: /etc/etcd/
+
+
+# Systemd file
+- name: Create the systemd Etcd configuration file
+  become: yes
+  notify: restart etcd
+  template: 
+    src: etcd.service.j2 
+    dest: /etc/systemd/system/etcd.service

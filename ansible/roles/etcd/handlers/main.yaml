@@ -1,0 +1,8 @@
+# Handlers for Etcd
+
+- name: restart etcd
+  become: yes
+  systemd: 
+    state: restarted 
+    name: etcd 
+    daemon_reload: yes

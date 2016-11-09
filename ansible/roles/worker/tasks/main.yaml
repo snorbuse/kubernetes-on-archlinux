@@ -1,0 +1,91 @@
+---
+# This playbook installs the Kubernetes worker.
+
+# CNI
+- name: Create the CNI install directory 
+  become: yes
+  file:
+    path: /opt/cni
+    state: directory
+- name: Install CNI
+  become: yes
+  unarchive: 
+    src: "https://storage.googleapis.com/kubernetes-release/network-plugins/cni-07a8a28637e97b22eb8dfe710eeae1344f69d16e.tar.gz"
+    remote_src: yes
+    dest: /opt/cni/
+    creates: /opt/cni/bin/cnitools
+
+# Kubernetes directory
+- name: Create the Kubernetes data directory
+  become: yes
+  file: 
+    path: /var/lib/kubernetes
+    state: directory
+
+# Certificates
+- name: Install the CA certificate
+  become: yes
+  copy: 
+    src: rootCA.pem
+    dest: /var/lib/kubernetes
+
+- name: Install the Kubernetes worker certificate
+  become: yes
+  copy: 
+    src: kubernetesworker.pem
+    dest: /var/lib/kubernetes
+
+- name: Install the Kubernetes worker certificate key
+  become: yes
+  copy: 
+    src: kubernetesworker-key.pem
+    dest: /var/lib/kubernetes
+
+
+# Config kubelet
+- name: Create Kubelet data directory
+  become: yes
+  file:
+    path: /var/lib/kubelet
+    state: directory
+- name: Create Kubetlet configuration file
+  become: yes
+  notify: restart kubelet
+  copy:
+    src: kubeconfig
+    dest: /var/lib/kubelet/kubeconfig
+
+# Downloading and installing binaries
+- name: Install kubelet
+  become: yes
+  get_url:
+    url: https://storage.googleapis.com/kubernetes-release/release/v1.4.0/bin/linux/amd64/kubelet
+    dest: /usr/bin
+    mode: "a+x"
+- name: Install kube-proxy
+  become: yes
+  get_url:
+    url: https://storage.googleapis.com/kubernetes-release/release/v1.4.0/bin/linux/amd64/kube-proxy
+    dest: /usr/bin
+    mode: "a+x"
+- name: Install kubectl
+  become: yes
+  get_url:
+    url: https://storage.googleapis.com/kubernetes-release/release/v1.4.0/bin/linux/amd64/kubectl
+    dest: /usr/bin
+    mode: "a+x"
+
+# Systemd files
+- name: Create the systemd Kubetlet configuration file
+  become: yes
+  notify: restart kubelet
+  copy: 
+    src: kubelet.service
+    dest: /etc/systemd/system/kubelet.service
+
+- name: Create the systemd Kube-proxy configuration file
+  become: yes
+  notify: restart kube-proxy
+  copy: 
+    src: kube-proxy.service
+    dest: /etc/systemd/system/kube-proxy.service

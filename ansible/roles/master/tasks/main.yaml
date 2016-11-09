@@ -1,0 +1,90 @@
+---
+# This playbook installs the Kubernetes master (apiserver, scheduler, controller-manager) daemons
+
+- name: Create Kubernetes data directory
+  become: yes
+  file: 
+    path: /var/lib/kubernetes
+    state: directory
+
+
+- name: Install the CA certificate
+  become: yes
+  copy: 
+    src: rootCA.pem
+    dest: /var/lib/kubernetes
+
+- name: Install the Kubernetes certificate
+  become: yes
+  copy: 
+    src: kubernetesmaster.pem
+    dest: /var/lib/kubernetes
+
+- name: Install the Kubernetes certificate key
+  become: yes
+  copy: 
+    src: kubernetesmaster-key.pem
+    dest: /var/lib/kubernetes
+
+
+- name: Create the authority token
+  become: yes
+  copy: 
+    src: token.csv
+    dest: /var/lib/kubernetes
+- name: Create the authorization policy
+  become: yes
+  copy: 
+    src: authorization-policy.jsonl
+    dest: /var/lib/kubernetes
+
+
+- name: Install kube-apiserver
+  become: yes
+  get_url:
+    url: https://storage.googleapis.com/kubernetes-release/release/v1.4.0/bin/linux/amd64/kube-apiserver
+    dest: /usr/bin
+    mode: "a+x"
+
+- name: Install kube-controller-manager
+  become: yes
+  get_url:
+    url: https://storage.googleapis.com/kubernetes-release/release/v1.4.0/bin/linux/amd64/kube-controller-manager
+    dest: /usr/bin
+    mode: "a+x"
+
+- name: Install kube-scheduler
+  become: yes
+  get_url:
+    url: https://storage.googleapis.com/kubernetes-release/release/v1.4.0/bin/linux/amd64/kube-scheduler
+    dest: /usr/bin
+    mode: "a+x"
+
+- name: Install kubectl
+  become: yes
+  get_url:
+    url: https://storage.googleapis.com/kubernetes-release/release/v1.4.0/bin/linux/amd64/kubectl
+    dest: /usr/bin
+    mode: "a+x"
+
+
+- name: Create the systemd kube-scheduler configuration file
+  become: yes
+  notify: restart kube-scheduler
+  template: 
+    src: kube-scheduler.service.j2
+    dest: /etc/systemd/system/kube-scheduler.service
+
+- name: Create the systemd kube-controller-manager
+  become: yes
+  notify: restart kube-controller-manager
+  template: 
+    src: kube-controller-manager.service.j2
+    dest: /etc/systemd/system/kube-controller-manager.service
+
+- name: Create the systemd kube-apiserver configuration file
+  become: yes
+  notify: restart kube-apiserver
+  template: 
+    src: kube-apiserver.service.j2
+    dest: /etc/systemd/system/kube-apiserver.service

@@ -1,0 +1,9 @@
+---
+# This playbook deploys the Kubernetes master nodes
+
+- name: Configure and deploy the Kubernetes master nodes
+  hosts: master
+  become_method: sudo
+  roles:
+    - master 
+    - etcd

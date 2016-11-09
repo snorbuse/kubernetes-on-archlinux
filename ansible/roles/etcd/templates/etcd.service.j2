@@ -15,11 +15,9 @@ ExecStart=/usr/bin/etcd --name {{inventory_hostname}} \
   --listen-client-urls https://{{ ansible_default_ipv4.address }}:2379,http://127.0.0.1:2379 \
   --advertise-client-urls https://{{ ansible_default_ipv4.address }}:2379 \
   --initial-cluster-token etcd-cluster-0 \
-  --initial-cluster etcd01=https://etcd01:2380,etcd02=https://etcd02:2380 \
+  --initial-cluster kbn-master01=https://kbn-master01:2380,kbn-master02=https://kbn-master02:2380 \
   --initial-cluster-state new \
   --data-dir=/var/lib/etcd
-#  --initial-cluster ETCD_NAME_1=https://etcd01:2380,ETCD_NAME_2=https://etcd02:2380 \
-#--name   etcd_name  \
 Restart=on-failure
 RestartSec=5
 
