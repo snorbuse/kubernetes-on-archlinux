@@ -5,5 +5,5 @@
   hosts: master
   become_method: sudo
   roles:
-    - master 
     - etcd
+    - master 
