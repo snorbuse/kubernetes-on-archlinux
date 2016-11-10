@@ -20,3 +20,4 @@
   systemd: 
     state: restarted 
     name: kube-controller-manager
+    daemon_reload: yes
