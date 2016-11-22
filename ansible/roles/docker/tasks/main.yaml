@@ -9,15 +9,68 @@
     creates: /usr/bin/docker
 
 
-- name: Install Docker binaries
+- name: Install docker binary
   become: yes
+  notify: restart docker
   copy: 
     remote_src: yes
-    src: "{{ item }}"
-    dest: /usr/bin
+    src: /tmp/docker/docker
+    dest: /usr/bin/docker
     mode: "u+x"
-  with_fileglob:
-  - /tmp/docker/docker*
+
+- name: Install docker-containerd binary
+  become: yes
+  notify: restart docker
+  copy: 
+    remote_src: yes
+    src: /tmp/docker/docker-containerd
+    dest: /usr/bin/docker-containerd
+    mode: "u+x"
+
+- name: Install docker-containerd-ctr binary
+  become: yes
+  notify: restart docker
+  copy: 
+    remote_src: yes
+    src: /tmp/docker/docker-containerd-ctr
+    dest: /usr/bin/docker-containerd-ctr
+    mode: "u+x"
+
+- name: Install docker-containerd-shim binary
+  become: yes
+  notify: restart docker
+  copy: 
+    remote_src: yes
+    src: /tmp/docker/docker-containerd-shim
+    dest: /usr/bin/docker-containerd-shim
+    mode: "u+x"
+
+- name: Install dockerd binary
+  become: yes
+  notify: restart docker
+  copy: 
+    remote_src: yes
+    src: /tmp/docker/dockerd
+    dest: /usr/bin/dockerd
+    mode: "u+x"
+
+- name: Install docker-proxy binary
+  become: yes
+  notify: restart docker
+  copy: 
+    remote_src: yes
+    src: /tmp/docker/docker-proxy
+    dest: /usr/bin/docker-proxy
+    mode: "u+x"
+
+- name: Install docker-runc binary
+  become: yes
+  notify: restart docker
+  copy: 
+    remote_src: yes
+    src: /tmp/docker/docker-runc
+    dest: /usr/bin/docker-runc
+    mode: "u+x"
 
 
 - name: Create Docker systemd configuration file
