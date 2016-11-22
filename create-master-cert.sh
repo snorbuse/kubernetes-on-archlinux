@@ -7,7 +7,7 @@ CSR_FILE='kubernetesmaster.csr'
 echo -n "Kbn master IP addresses: "
 read IP_LIST
 
-echo -ne "subjectAltName = DNS:kbn-master01, DNS:kbn-master02" > extfile.cnf
+echo -ne "subjectAltName = DNS:kbn-master01, DNS:kbn-master02, IP:10.32.0.1" > extfile.cnf
 for IP in $IP_LIST; do
   echo -ne ", IP:$IP" >> extfile.cnf
 done
