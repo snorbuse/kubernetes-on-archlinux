@@ -10,18 +10,30 @@
 
 - name: Install the CA certificate
   become: yes
+  notify: 
+    - restart kube-apiserver
+    - restart kube-controller-manager
+    - restart kube-scheduler
   copy: 
     src: rootCA.pem
     dest: /var/lib/kubernetes
 
 - name: Install the Kubernetes certificate
   become: yes
+  notify: 
+    - restart kube-apiserver
+    - restart kube-controller-manager
+    - restart kube-scheduler
   copy: 
     src: kubernetesmaster.pem
     dest: /var/lib/kubernetes
 
 - name: Install the Kubernetes certificate key
   become: yes
+  notify: 
+    - restart kube-apiserver
+    - restart kube-controller-manager
+    - restart kube-scheduler
   copy: 
     src: kubernetesmaster-key.pem
     dest: /var/lib/kubernetes
