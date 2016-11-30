@@ -4,8 +4,8 @@ Documentation=http://docs.docker.io
 
 [Service]
 ExecStart=/usr/bin/docker daemon \
-  --iptables=false \
-  --ip-masq=false \
+  --iptables=true \
+  --ip-masq=true \
   --host=unix:///var/run/docker.sock \
   --log-level=error \
   --storage-driver=overlay
