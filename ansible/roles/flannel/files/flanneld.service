@@ -1,0 +1,16 @@
+[Unit]
+Description=Flanneld 
+Documentation=https://github.com/coreos/flannel
+
+[Service]
+ExecStart=/usr/bin/flanneld \
+-etcd-endpoints="https://kbn-master01:2379,https://kbn-master02:2379" \
+-etcd-prefix="/kube-flanneld/network" \
+-etcd-cafile=/etc/flanneld/rootCA.pem \
+-etcd-certfile=/etc/flanneld/kubernetesworker.pem \
+-etcd-keyfile=/etc/flanneld/kubernetesworker-key.pem
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,71 @@
+---
+# This playbook will install Docker
+
+
+- name: Create the Flannel data directory
+  become: yes
+  file: 
+    path: /etc/flanneld
+    state: directory
+
+# Certificates
+- name: Install the CA certificate
+  become: yes
+  copy: 
+    src: rootCA.pem
+    dest: /etc/flanneld/
+
+- name: Install the certificate
+  become: yes
+  copy: 
+    src: kubernetesworker.pem
+    dest: /etc/flanneld
+
+- name: Install the key certificate
+  become: yes
+  copy: 
+    src: kubernetesworker-key.pem
+    dest: /etc/flanneld
+
+- name: Download flanneld binaries
+  unarchive: 
+    src: "https://github.com/coreos/flannel/releases/download/v0.6.2/flannel-v0.6.2-linux-amd64.tar.gz"
+    remote_src: yes
+    dest: /tmp/
+    creates: /usr/bin/flanneld
+
+
+- name: Install Flanneld binary
+  become: yes
+  copy: 
+    remote_src: yes
+    src: /tmp/flanneld
+    mode: "u+x"
+    dest: /usr/bin/flanneld
+
+
+- name: Create Flannel systemd configuration file
+  become: yes
+  template:
+    src: ../files/flanneld.service
+    dest: /etc/systemd/system/flanneld.service
+
+- name: restart flanneld
+  become: yes
+  notify: restart docker
+  systemd:
+    name: flanneld
+    state: restarted
+    daemon_reload: yes
+
+- name: wait for flannel to start
+  wait_for:
+    path: /run/flannel/subnet.env
+    timeout: 300
+
+- name: Update Docker systemd configuration file
+  become: yes
+  notify: restart docker
+  template:
+    src: ../files/docker.service
+    dest: /etc/systemd/system/docker.service

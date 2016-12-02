@@ -1,0 +1,34 @@
+
+- name: Create the Flannel config directory
+  become: yes
+  file: 
+    path: /etc/flannel
+    state: directory
+
+# Certificates
+- name: Install the CA certificate
+  become: yes
+  copy: 
+    src: rootCA.pem
+    dest: /etc/flannel/
+
+- name: Install the certificate
+  become: yes
+  copy: 
+    src: kubernetesworker.pem
+    dest: /etc/flannel
+
+- name: Install the key certificate
+  become: yes
+  copy: 
+    src: kubernetesworker-key.pem
+    dest: /etc/flannel
+
+
+
+- name: Generate etcd configuration for etcd
+  become: yes
+  notify: Insert flannel config
+  copy:
+    src: "flannel-config.json"
+    dest: "/etc/flannel/config.json"

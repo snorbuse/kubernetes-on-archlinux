@@ -1,0 +1,14 @@
+# This playbook deploys the Kubernetes networking
+
+- name: Configure networking on the Kubernetes master nodes
+  hosts: master
+  become_method: sudo
+  roles:
+    - flannel-register
+
+- name: Configure networking on the Kubernetes worker nodes
+  hosts: worker
+  become_method: sudo
+  roles:
+    - flannel
+

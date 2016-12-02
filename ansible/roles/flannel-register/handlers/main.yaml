@@ -1,0 +1,3 @@
+- name: Insert flannel config
+  become: yes
+  command: 'curl -L --cacert /etc/flannel/rootCA.pem --cert /etc/flannel/kubernetesworker.pem --key /etc/flannel/kubernetesworker-key.pem https://kbn-master01:2379/v2/keys/kube-flanneld/network/config -XPUT --data-urlencode value@/etc/flannel/config.json'
