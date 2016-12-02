@@ -89,3 +89,19 @@
   copy: 
     src: kube-proxy.service
     dest: /etc/systemd/system/kube-proxy.service
+
+- name: Make sure Kubelet is started
+  become: yes
+  systemd: 
+    name: kubelet
+    daemon_reload: yes
+    state: started 
+
+- name: Make sure Kube-proxy is started
+  become: yes
+  systemd: 
+    name: kube-proxy
+    daemon_reload: yes
+    state: started 
+
+  
