@@ -112,3 +112,10 @@ curl --cacert /var/lib/kubernetes/rootCA.pem -H "Authorization: Bearer secretPas
 # From inside a pod
 curl --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt  -H "Authorization: Bearer secretPassW0rd" https://10.32.0.1:443/
 ```
+
+## ToDo
+- GlusterFs volume claims
+- Add Docker registry
+- Add Jenkins
+  - Make Jenkins build Docker-images
+- Cluster federation
