@@ -102,6 +102,16 @@ Name:      nginxservice
 Address 1: 10.32.0.249 nginxservice.default.svc.cluster.local
 ```
 
+## Storage
+I use GlusterFS as a storage engine. It assumes that the masters has a 40GB volume at /dev/sdb1 
+
+To install and configure GlusterFS just run it's playbook
+
+```
+ansible-playbook gluster.yaml -i hosts --ask-sudo-pass 
+```
+
+
 ## Misc commands
 
 ## Curl the apiserver
