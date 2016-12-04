@@ -19,3 +19,8 @@
 - name: be sure wget is installed
   pacman: name=wget state=present
 
+
+- name: Make sure GlusterFs client is installed
+  pacman:
+    name: glusterfs
+    state: present
