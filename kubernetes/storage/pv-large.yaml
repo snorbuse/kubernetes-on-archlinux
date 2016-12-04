@@ -1,0 +1,31 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: large01
+  labels:
+    type: glusterfs
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  glusterfs:
+    path: "/large01"
+    endpoints: glusterfs-cluster
+  persistentVolumeReclaimPolicy: Recycle
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: large02
+  labels:
+    type: glusterfs
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  glusterfs:
+    path: "/large02"
+    endpoints: glusterfs-cluster
+  persistentVolumeReclaimPolicy: Recycle

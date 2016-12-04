@@ -1,0 +1,63 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: medium01
+  labels:
+    type: glusterfs
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  glusterfs:
+    path: "/medium01"
+    endpoints: glusterfs-cluster
+  persistentVolumeReclaimPolicy: Recycle
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: medium02
+  labels:
+    type: glusterfs
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  glusterfs:
+    path: "/medium02"
+    endpoints: glusterfs-cluster
+  persistentVolumeReclaimPolicy: Recycle
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: medium03
+  labels:
+    type: glusterfs
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  glusterfs:
+    path: "/medium03"
+    endpoints: glusterfs-cluster
+  persistentVolumeReclaimPolicy: Recycle
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: medium04
+  labels:
+    type: glusterfs
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  glusterfs:
+    path: "/medium04"
+    endpoints: glusterfs-cluster
+  persistentVolumeReclaimPolicy: Recycle
