@@ -6,6 +6,7 @@
   systemd: 
     state: restarted 
     name: kube-apiserver
+    enabled: yes
     daemon_reload: yes
 
 - name: restart kube-scheduler
@@ -13,6 +14,7 @@
   systemd: 
     state: restarted 
     name: kube-scheduler
+    enabled: yes
     daemon_reload: yes
 
 - name: restart kube-controller-manager
@@ -20,4 +22,5 @@
   systemd: 
     state: restarted 
     name: kube-controller-manager
+    enabled: yes
     daemon_reload: yes
