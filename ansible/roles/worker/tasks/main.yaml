@@ -95,6 +95,7 @@
   systemd: 
     name: kubelet
     daemon_reload: yes
+    enabled: yes 
     state: started 
 
 - name: Make sure Kube-proxy is started
@@ -102,6 +103,7 @@
   systemd: 
     name: kube-proxy
     daemon_reload: yes
+    enabled: yes 
     state: started 
 
   
