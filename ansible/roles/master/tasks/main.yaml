@@ -54,28 +54,28 @@
 - name: Install kube-apiserver
   become: yes
   get_url:
-    url: https://storage.googleapis.com/kubernetes-release/release/v1.4.0/bin/linux/amd64/kube-apiserver
+    url: https://storage.googleapis.com/kubernetes-release/release/v1.5.2/bin/linux/amd64/kube-apiserver
     dest: /usr/bin
     mode: "a+x"
 
 - name: Install kube-controller-manager
   become: yes
   get_url:
-    url: https://storage.googleapis.com/kubernetes-release/release/v1.4.0/bin/linux/amd64/kube-controller-manager
+    url: https://storage.googleapis.com/kubernetes-release/release/v1.5.2/bin/linux/amd64/kube-controller-manager
     dest: /usr/bin
     mode: "a+x"
 
 - name: Install kube-scheduler
   become: yes
   get_url:
-    url: https://storage.googleapis.com/kubernetes-release/release/v1.4.0/bin/linux/amd64/kube-scheduler
+    url: https://storage.googleapis.com/kubernetes-release/release/v1.5.2/bin/linux/amd64/kube-scheduler
     dest: /usr/bin
     mode: "a+x"
 
 - name: Install kubectl
   become: yes
   get_url:
-    url: https://storage.googleapis.com/kubernetes-release/release/v1.4.0/bin/linux/amd64/kubectl
+    url: https://storage.googleapis.com/kubernetes-release/release/v1.5.2/bin/linux/amd64/kubectl
     dest: /usr/bin
     mode: "a+x"
 

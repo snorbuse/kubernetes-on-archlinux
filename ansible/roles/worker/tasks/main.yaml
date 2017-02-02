@@ -59,19 +59,19 @@
 - name: Install kubelet
   become: yes
   get_url:
-    url: https://storage.googleapis.com/kubernetes-release/release/v1.4.0/bin/linux/amd64/kubelet
+    url: https://storage.googleapis.com/kubernetes-release/release/v1.5.2/bin/linux/amd64/kubelet
     dest: /usr/bin
     mode: "a+x"
 - name: Install kube-proxy
   become: yes
   get_url:
-    url: https://storage.googleapis.com/kubernetes-release/release/v1.4.0/bin/linux/amd64/kube-proxy
+    url: https://storage.googleapis.com/kubernetes-release/release/v1.5.2/bin/linux/amd64/kube-proxy
     dest: /usr/bin
     mode: "a+x"
 - name: Install kubectl
   become: yes
   get_url:
-    url: https://storage.googleapis.com/kubernetes-release/release/v1.4.0/bin/linux/amd64/kubectl
+    url: https://storage.googleapis.com/kubernetes-release/release/v1.5.2/bin/linux/amd64/kubectl
     dest: /usr/bin
     mode: "a+x"
 

@@ -102,8 +102,72 @@ Name:      nginxservice
 Address 1: 10.32.0.249 nginxservice.default.svc.cluster.local
 ```
 
+### Ingress
+When you have the DNS up and running it's time to create the ingress resources. Copy the kubernetes directory to one of the master nodes
+
+Login to the master node and create the ingress resouces
+```bash
+user@desktop$ ssh kbn-master01
+user@kbn-master01$ kubectl create -f kubernetes/ingress/
+
+# Verify that the DNS pod is up and running
+user@kbn-master01$ kubectl get pods 
+NAME                             READY     STATUS    RESTARTS   AGE
+default-http-backend-h4lp8       1/1       Running   0          1h
+nginx-1x50k                      1/1       Running   0          1h
+nginx-ingress-controller-48jgv   1/1       Running   0          1h
+nginx-ingress-controller-ctgnp   1/1       Running   0          1h
+nginx-ingress-controller-v75xg   1/1       Running   0          1h
+
+# And verify that the ingress resource is created
+dread@kbn-master01:~/kubernetes/ingress$ kubectl get ingress
+NAME            HOSTS               ADDRESS            PORTS     AGE
+example-nginx   nginx.example.com   192.168.1.95,...   80        1h
+
+# Make sure the ingress routing is working
+user@kbn-master01$ curl http://192.168.1.95 -H "Host: nginx.example.com"
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+</style>
+</head>
+<body>
+<h1>Welcome to nginx!</h1>
+<p>If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.</p>
+
+<p>For online documentation and support please refer to
+<a href="http://nginx.org/">nginx.org</a>.<br/>
+Commercial support is available at
+<a href="http://nginx.com/">nginx.com</a>.</p>
+
+<p><em>Thank you for using nginx.</em></p>
+</body>
+</html>
+```
+
+
+
 ## Storage
 I use GlusterFS as a storage engine. It assumes that the masters has a 40GB volume at /dev/sdb1 
+To create that volume, 
+1. Open virt-manager and select one of the master machines
+1. Add hardware --> Storage --> Add a 40gb LVM storage
+1. Reboot the machine
+1. Login to the machine
+1. Partition the new disk with 'sudo fdisk /dev/sdb'
+1. Press 'n' to create a new volume and select everything default
+1. Press 'w' to write and quit fdisk
+1. Verify that the disk is created with 'lsblk'
+
+Repeat with the other master.
 
 To install and configure GlusterFS just run it's playbook
 
