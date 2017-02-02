@@ -153,6 +153,91 @@ Commercial support is available at
 </html>
 ```
 
+### Ingress TLS
+Next up is to secure the ingress connections. Create a key and cert for the nginx-resource by running the script create-nginx.sh.
+```
+# Base64-encode the cert and 
+user@desktop$ cat cert/nginx.pem |base64 -w 0 > nginx.enc
+user@desktop$ cat cert/nginx-key.pem |base64 -w 0 > nginx-key.enc
+
+# Create the tls secret for Nginx
+user@desktop$ cat nginx-tls-secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: nginxtls
+  namespace: default
+type: Opaque
+data:
+  tls.crt: <content of nginx.enc>
+  tls.key: <content of nginx-key.enc>
+
+# Copy the yaml to one of the master nodes
+user@desktop$ scp nginx-tls-secret.yaml @kbn-master01:
+
+# Create the secret
+user@kbn-master01$ kubectl create -f nginx-tls-secret.yaml
+
+# Modify the ingress resource for Nginx by adding the TLS part:
+#  tls:
+#  - hosts:
+#    - nginx.example.com
+#    secretName: tlsnginx
+user@kbn-master01$ kubectl get ingress example-nginx -o yaml
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: example-nginx
+  namespace: default
+spec:
+  rules:
+  - host: nginx.example.com
+    http:
+      paths:
+      - backend:
+          serviceName: nginxservice
+          servicePort: 80
+        path: /
+  tls:
+  - hosts:
+    - nginx.example.com
+    secretName: nginxtls
+
+# Verify that it works
+user@desktop$ curl -v --cacert cert/rootCA.pem https://nginx.example.com --resolve "nginx.example.com:443:192.168.1.144"
+* Added nginx.example.com:443:192.168.1.144 to DNS cache
+* Rebuilt URL to: https://nginx.example.com/
+* Hostname nginx.example.com was found in DNS cache
+*   Trying 192.168.1.144...
+[...]
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+</style>
+</head>
+<body>
+<h1>Welcome to nginx!</h1>
+<p>If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.</p>
+
+<p>For online documentation and support please refer to
+<a href="http://nginx.org/">nginx.org</a>.<br/>
+Commercial support is available at
+<a href="http://nginx.com/">nginx.com</a>.</p>
+
+<p><em>Thank you for using nginx.</em></p>
+</body>
+</html>
+
+
+```
 
 
 ## Storage
