@@ -243,6 +243,7 @@ Commercial support is available at
 ## Storage
 I use GlusterFS as a storage engine. It assumes that the masters has a 40GB volume at /dev/sdb1 
 To create that volume, 
+
 1. Open virt-manager and select one of the master machines
 1. Add hardware --> Storage --> Add a 40gb LVM storage
 1. Reboot the machine
