@@ -261,6 +261,60 @@ To install and configure GlusterFS just run it's playbook
 ansible-playbook gluster.yaml -i hosts --ask-sudo-pass 
 ```
 
+## Docker-registry
+To create a Docker-registry inside of Kubernetes you must first create the certificate for the domain by running the 
+script create-docker-cert.sh and then inserting the cert into a secret
+
+
+```
+# Base64-encode the cert and 
+user@desktop$ cat cert/docker.pem |base64 -w 0 > docker.enc
+user@desktop$ cat cert/docker-key.pem |base64 -w 0 > docker-key.enc
+
+# Create the tls secret for Nginx
+user@desktop$ cat docker-tls-secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: docker-tls-cert
+  namespace: default
+type: Opaque
+data:
+  tls.crt: <content of nginx.enc>
+  tls.key: <content of nginx-key.enc>
+
+# Copy the secret and configuration-files to one of the master nodes
+user@desktop$ scp nginx-tls-secret.yaml @kbn-master01:
+user@desktop$ scp kubernetes/registry/ @kbn-master01:
+
+# Create the secret
+user@kbn-master01$ kubectl create -f nginx-tls-secret.yaml
+
+# Create the Docker registry resources
+user@kbn-master01$ kubectl create -f kubernetes/registry/docker-registry.yaml
+
+# Make sure that the pod has started
+user@kbn-master01$ kubectl get pods
+NAME                             READY     STATUS    RESTARTS   AGE
+docker-registry-frjf7            1/1       Running   0          1d
+
+# As root on your desktop, copy your rootCA certficate to your docker-config directory in 
+# order to be able to securly connect to that host
+root@desktop$ mkdir -p /etc/docker/cert/docker.example.com/
+root@desktop$ cp cert/rootCA.pem /etc/docker/cert/docker.example.com/
+root@desktop$ systemctl restart docker
+
+# Test your newly create Docker-registry
+user@desktop$ docker pull ubuntu:16.04
+user@desktop$ docker tag ubuntu:16.04 docker.example.com/ubuntu:16.04
+user@desktop$ docker push docker.example.com/ubuntu:16.04
+The push refers to a repository [docker.example.com/ubuntu]
+5eb5bd4c5014: Pushed 
+d195a7a18c70: Pushed 
+af605e724c5a: Pushed 
+59f161c3069d: Pushed 
+4f03495a4d7d: Pushing [========================>                          ]  63.9 MB/129.5 MB
+```
 
 ## Misc commands
 
@@ -275,7 +329,7 @@ curl --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt  -H "Authoriz
 
 ## ToDo
 - GlusterFs volume claims
-- Add Docker registry
+- ~~Add Docker registry~~
 - Add Jenkins
   - Make Jenkins build Docker-images
 - Cluster federation

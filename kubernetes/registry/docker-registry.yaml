@@ -1,3 +1,14 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: registry-claim
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
 apiVersion: v1
 kind: ReplicationController
 metadata:
@@ -18,10 +29,17 @@ spec:
           limits:
             cpu: 100m
             memory: 100Mi
+        volumeMounts:
+        - mountPath: /var/lib/registry
+          name: image-store
         ports:
         - containerPort: 5000
           name: registry
           protocol: TCP
+      volumes:
+      - name: image-store
+        persistentVolumeClaim:
+          claimName: registry-claim
 ---
 apiVersion: v1
 kind: Service
@@ -47,4 +65,8 @@ spec:
       - backend:
           serviceName: docker-registry
           servicePort: 5000
+  tls:
+  - hosts:
+    - docker.example.com
+    secretName: docker-tls-cert
 
