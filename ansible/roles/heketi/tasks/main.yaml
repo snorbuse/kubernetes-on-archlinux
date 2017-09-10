@@ -1,0 +1,106 @@
+---
+# This play will install and configure Heketi
+
+- name: Copy GlusterFS daemonset config file
+  copy: 
+    src: glusterfs-daemonset.json
+    dest: /tmp/glusterfs-daemonset.json
+
+- name: Label the nodes as GlusterFS storage nodes
+  command: kubectl label node storagenode=glusterfs --all --overwrite=true
+  run_once: true
+
+- name: Create GlusterFS daemonset
+  command: kubectl apply -f /tmp/glusterfs-daemonset.json 
+  run_once: true
+
+- name: Wait for GlusterFS to start 
+  shell: while true ; do FOO=`kubectl get pods | grep glusterfs | grep Running | wc -l`  ;  if [ $FOO -gt 2 ] ; then break; else sleep 1; fi; done
+
+- name: Copy Heketi service account config file
+  copy: 
+    src: serviceaccount.yaml
+    dest: /tmp/serviceaccount.yaml
+
+- name: Create service account for Heketi
+  command: kubectl apply -f /tmp/serviceaccount.yaml
+  run_once: true
+
+- name: Copy Heketi deployment config file
+  copy: 
+    src: heketi-deployment.json
+    dest: /tmp/heketi-deployment.json
+
+
+- name: Create Heketi deployment
+  command: kubectl apply -f /tmp/heketi-deployment.json
+  run_once: true
+
+- name: Wait for Heketi deployment to start 
+  shell: while true ; do if kubectl get pods | grep heketi- | grep Running > /dev/null 2>&1 ; then break; else sleep 1; fi; done
+
+
+- name: Remove old exposed Heketi service
+  command: kubectl delete svc/heketi-nodeport
+  run_once: true
+
+- name: Expose Heketi service
+  command: kubectl expose deployment heketi --type=NodePort --name=heketi-nodeport
+  run_once: true
+
+- name: Get Heketi service port
+  command: kubectl get svc heketi-nodeport --template="{{ '{{' }}(index .spec.ports 0).nodePort}}"
+  register: heketiport
+  run_once: true
+
+- debug:
+    msg: "Heketi port: {{ heketiport.stdout }}"
+
+- name: Verify Heketi deployment
+  command: curl http://{{groups['worker'][0]}}:{{ heketiport.stdout }}/hello
+  register: heketioutput
+  run_once: true
+
+- debug:
+    msg: "Heketi message: {{heketioutput.stdout}}"
+
+
+- name: Download Heketi client
+  unarchive: 
+    src: "https://github.com/heketi/heketi/releases/download/v4.0.0/heketi-client-v4.0.0.linux.amd64.tar.gz"
+    remote_src: yes 
+    dest: /tmp/
+    creates: /usr/bin/heketi-client
+
+- name: Install Heketi client
+  copy: 
+    remote_src: yes 
+    src: /tmp/heketi-client/bin/heketi-cli
+    dest: /usr/bin/heketi-cli
+    mode: "a+x"
+
+
+- name: Create topology template
+  template: 
+    src: topology-sample.j2
+    dest: /etc/topology.json
+
+- name: Load toplogy template
+  command: heketi-cli --server=http://{{groups['worker'][0]}}:{{ heketiport.stdout }} topology load --json=/etc/topology.json
+  run_once: true
+
+- name: Boostrap Heketi deployment
+  command: heketi-cli --server=http://{{groups['worker'][0]}}:{{ heketiport.stdout }} setup-openshift-heketi-storage --listfile=/etc/foo.json
+  run_once: true
+
+- name: Delete Heketi deployment
+  command: kubectl delete all,service,jobs,deployment,secret --selector="deploy-heketi"
+  run_once: true
+
+- name: Remove old exposed Heketi service
+  command: kubectl delete svc/heketi-nodeport
+  run_once: true
+
+- name: Start Heketi 
+  command: kubectl create -f /etc/foo.json
+  run_once: true

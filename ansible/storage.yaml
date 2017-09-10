@@ -1,0 +1,8 @@
+# This playbook installs and configures Heketi for Kubernetes
+
+- name: Configure GlusterFS for Kubernetes
+  hosts: master
+  become_method: sudo
+  become: yes
+  roles:
+    - heketi
