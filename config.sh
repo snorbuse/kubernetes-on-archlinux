@@ -116,8 +116,28 @@ function createAdmin {
   kubectl config use-context default --kubeconfig=$BASEDIR/admin.kubeconfig
 }
 
+function createEncryptionKey {
+  ENCRYPTION_KEY=$(head -c 32 /dev/urandom | base64)
+
+  cat > $BASEDIR/encryption-config.yaml <<EOF
+  kind: EncryptionConfig
+  apiVersion: v1
+  resources:
+    - resources:
+        - secrets
+      providers:
+        - aescbc:
+            keys:
+              - name: key1
+                secret: ${ENCRYPTION_KEY}
+        - identity: {}
+EOF
+
+}
+
 createKubelet "10.0.1.10" "10.0.1.11"
 createProxy
 createControllerManager
 createScheduler
 createAdmin
+createEncryptionKey
