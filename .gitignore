@@ -1,4 +1,6 @@
 cert/*
+certificate/*
 *retry
 hosts
 *.pem
+*.srl
