@@ -1,5 +1,6 @@
 cert/*
 certificate/*
+configuration/*
 *retry
 hosts
 *.pem
