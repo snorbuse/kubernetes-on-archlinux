@@ -176,10 +176,22 @@ function createInfra {
   signCsr $CSR $CERT  
 }
 
+function findMasters {
+  grep -B 100 \\[worker\\] ansible/hosts | grep --color=auto -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b"
+}
+
+function findWorkers {
+  grep -A 100 \\[worker\\] ansible/hosts | grep --color=auto -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b"
+}
 
 createCA
-createApiServer "10.0.1.2" 
-createKubelet "10.0.1.10"
+
+for IP in `findMasters`; do
+  createApiServer $IP
+done
+for IP in `findWorkers`; do
+  createKubelet $IP
+done
 createInfra "admin" "system:masters" "admin"
 createInfra "kube-proxy" "system:node-proxier" "system:kube-proxy"
 createInfra "serviceaccount" "Kubernetes" "service-accounts" 

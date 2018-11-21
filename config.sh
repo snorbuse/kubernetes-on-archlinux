@@ -135,7 +135,13 @@ EOF
 
 }
 
-createKubelet "10.0.1.10" "10.0.1.11"
+function findWorkers {
+  grep -A 100 \\[worker\\] ansible/hosts | grep --color=auto -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b"
+}
+
+for IP in `findWorkers`; do
+  createKubelet $IP
+done
 createProxy
 createControllerManager
 createScheduler
