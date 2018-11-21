@@ -1,3 +1,15 @@
-[etcd]
-etcd01 ansible_ssh_host=192.168.1.101
-etcd02 ansible_ssh_host=192.168.1.102
+[master]
+192.168.1.251
+192.168.1.158
+
+[worker]
+192.168.1.75
+192.168.1.137
+192.168.1.142
+
+[master:vars]
+ansible_python_interpreter=/usr/bin/python2
+
+[worker:vars]
+ansible_python_interpreter=/usr/bin/python2
+
