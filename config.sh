@@ -96,10 +96,11 @@ function createScheduler {
 }
 
 function createAdmin {
+  master=$(findMasters | head -n 1)
   kubectl config set-cluster kubernetes-the-hard-way \
     --certificate-authority=$CERTDIR/rootCA.pem \
     --embed-certs=true \
-    --server=https://127.0.0.1:6443 \
+    --server=https://$master:6443 \
     --kubeconfig=$BASEDIR/admin.kubeconfig
 
   kubectl config set-credentials admin \
@@ -133,6 +134,10 @@ function createEncryptionKey {
         - identity: {}
 EOF
 
+}
+
+function findMasters {
+  grep -B 100 \\[worker\\] ansible/hosts | grep --color=auto -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b"
 }
 
 function findWorkers {
