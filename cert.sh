@@ -137,7 +137,7 @@ function createApiServer {
     KEY=$APISERVER-$IP-key.pem 
     CSR=$APISERVER-$IP.csr 
 
-    createCNF "subjectAltName = DNS: kubernetes.default, IP: $IP" 
+    createCNF "subjectAltName = DNS: kubernetes.default, IP: 127.0.0.1, IP: $IP" 
 
     info "APISERVER" "($IP) - Creating private key"
     generateKey $KEY
