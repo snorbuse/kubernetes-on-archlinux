@@ -6,6 +6,15 @@ The purpose of this guide is a) for me to learn more about Kubernetes, and since
 ## Prerequisites
 This guide installs Kubernetes on a five node VM setup where all the VM:s runs a freshly installed Arch linux. It also assumes that you have ssh-keys configure so you can reach your VM:s directly from your desktop without using password.
 
+### SSH settings
+If you are creating and destroying a lot of VMs and the DNS reuses IP-adresses, just insert this configuration into `~/.ssh/config`
+```
+Host 192.168.1.*
+    StrictHostKeyChecking no
+```
+
+Don't forget to add you SSH by using ssh-keygen and ssh-copy-id
+
 ## Installation with Ansible
 
 ## Layout
@@ -43,7 +52,7 @@ cp hosts.example hosts
 Then it's just a matter of running the playbooks
 
 ```bash
-ansible-playbook site.yaml -i hosts --ask-sudo-pass
+ansible-playbook site.yaml -i hosts --ask-become-pass
 ```
 
 If everything works fine you should now have a working Kubernetes cluster. Login to one of your master-nodes and check the status.
