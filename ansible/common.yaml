@@ -1,9 +1,0 @@
----
-# This playbook deploys the Kubernetes master nodes
-
-- name: Apply common configuration to all nodes
-  hosts: all
-  become_method: sudo
-  become: yes
-  roles:
-    - common
