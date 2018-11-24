@@ -1,0 +1,22 @@
+# Handlers for Kubernetes master
+
+- name: Restart kube-apiserver
+  systemd: 
+    state: restarted 
+    name: kube-apiserver 
+    enabled: yes
+    daemon_reload: yes
+
+- name: Restart kube-controller-manager
+  systemd: 
+    state: restarted 
+    name: kube-controller-manager 
+    enabled: yes
+    daemon_reload: yes
+
+- name: Restart kube-scheduler
+  systemd: 
+    state: restarted 
+    name: kube-scheduler 
+    enabled: yes
+    daemon_reload: yes

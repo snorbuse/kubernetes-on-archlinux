@@ -1,0 +1,136 @@
+---
+# Boostrapping the Kubernetes master
+
+- name: Check if kube-apiserver exists
+  stat:
+    path: /usr/local/bin/kube-apiserver
+  register: apiserver
+
+- name: Check if kube-controller-manager exists
+  stat:
+    path: /usr/local/bin/kube-controller-manager
+  register: controller
+
+- name: Check if kube-scheduler exists
+  stat:
+    path: /usr/local/bin/kube-scheduler
+  register: scheduler
+
+
+## Download and install
+
+- name: Download and install kube-apiserver
+  get_url:
+    url: "{{ kubernetes_url}}/kube-apiserver"
+    dest: /usr/local/bin
+    mode: "a+x"
+  when: apiserver.stat.exists == false
+
+- name: Download and install kube-controller-manager
+  get_url:
+    url: "{{ kubernetes_url}}/kube-controller-manager"
+    dest: /usr/local/bin
+    mode: "a+x"
+  when: controller.stat.exists == false
+
+- name: Download and install kube-scheduler
+  get_url:
+    url: "{{ kubernetes_url}}/kube-scheduler"
+    dest: /usr/local/bin
+    mode: "a+x"
+  when: scheduler.stat.exists == false
+
+
+## Configuration
+
+- name: Create certificate and configuration directory
+  file: 
+    path: /var/lib/kubernetes
+    state: directory
+
+- name: Create Kubernetes configuration directory
+  file: 
+    path: /etc/kubernetes/config
+    state: directory
+
+- name: Copy configurations
+  copy: 
+    src: "{{ config_dir }}/{{ item }}" 
+    dest: /var/lib/kubernetes
+  with_items:
+    - encryption-config.yaml
+    - kube-controller-manager.kubeconfig
+    - kube-scheduler.kubeconfig
+
+- name: Create scheduler config
+  copy:
+    src: kube-scheduler.yaml
+    dest: /etc/kubernetes/config
+ 
+
+## Certificate
+
+- name: Copy certificates
+  copy: 
+    src: "{{ cert_dir }}/{{ item }}" 
+    dest: /var/lib/kubernetes
+  with_items:
+    - rootCA.pem
+    - apiserver-{{ ansible_default_ipv4.address }}.pem
+    - apiserver-{{ ansible_default_ipv4.address }}-key.pem
+    - serviceaccount.pem
+    - serviceaccount-key.pem
+
+## Systemd
+
+- name: Create the kube-apiserver.service systemd unit file
+  notify: Restart kube-apiserver
+  register: apiserver_service
+  template: 
+    src: kube-apiserver.service.j2
+    dest: /etc/systemd/system/kube-apiserver.service
+
+- name: Create the kube-controller-manager.service systemd unit file
+  notify: Restart kube-controller-manager
+  register: controller_service
+  template: 
+    src: kube-controller-manager.service.j2
+    dest: /etc/systemd/system/kube-controller-manager.service
+
+- name: Create the kube-scheduler.service systemd unit file
+  notify: Restart kube-scheduler
+  register: scheduler_service
+  template: 
+    src: kube-scheduler.service.j2
+    dest: /etc/systemd/system/kube-scheduler.service
+
+- name: Start kube-apiserver
+  systemd: 
+    state: started 
+    name: kube-apiserver 
+    enabled: yes
+    daemon_reload: yes
+  when: apiserver_service.changed == false
+
+- name: Start kube-controller-manager
+  systemd: 
+    state: started 
+    name: kube-controller-manager 
+    enabled: yes
+    daemon_reload: yes
+  when: controller_service.changed == false
+
+- name: Start kube-scheduler
+  systemd: 
+    state: started 
+    name: kube-scheduler 
+    enabled: yes
+    daemon_reload: yes
+  when: scheduler_service.changed == false
+
+- name: Run handlers
+  meta: flush_handlers
+
+- name: Pause for manual Kubelet authorization installation
+  pause:
+    prompt: "Run the kubelet command to install kubelet authorization\nkubectl apply --kubeconfig {{ config_dir }}/admin.kubeconfig -f ../kubernetes/cluster-role.yaml\nkubectl apply --kubeconfig {{ config_dir }}/admin.kubeconfig -f ../kubernetes/cluster-role-binding.yaml"
