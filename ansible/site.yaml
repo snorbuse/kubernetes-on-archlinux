@@ -1,5 +1,4 @@
 ---
-- include: common.yaml
-- include: kbn-master.yaml
-- include: kbn-worker.yaml
-- include: kbn-networking.yaml
+# Main playbook for installing Kubernetes
+
+- import_playbook: masters.yaml

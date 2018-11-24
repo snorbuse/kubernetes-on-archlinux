@@ -1,0 +1,51 @@
+---
+# Boostrapping the nodes with common stuff. Like wget...
+
+- name: Check if Etcd exists
+  stat:
+    path: /usr/bin/etcd
+  register: stat_etcd
+
+- name: Download Etcd
+  unarchive: 
+    src: "{{ etcd_url }}" 
+    remote_src: yes 
+    dest: /tmp 
+  when: stat_etcd.stat.exists == false
+
+- name: Install etcd
+  copy: 
+    remote_src: yes 
+    src: /tmp/etcd-{{ etcd_version }}/etcd 
+    dest: /usr/bin/etcd 
+    mode: "a+x"
+  when: stat_etcd.stat.exists == false
+
+- name: Install etcdctl
+  copy: 
+    remote_src: yes 
+    src: /tmp/etcd-{{ etcd_version }}/etcdctl 
+    dest: /usr/bin/etcdctl 
+    mode: "a+x"
+  when: stat_etcd.stat.exists == false
+
+- name: Create Etcd configuration directory
+  file: 
+    path: /etc/etcd
+    state: directory
+
+- name: Install certificates
+  copy: 
+    src: "{{ cert_dir }}/{{ item }}" 
+    dest: /etc/etcd/
+  with_items:
+    - rootCA.pem
+    - apiserver-{{ ansible_default_ipv4.address }}.pem
+    - apiserver-{{ ansible_default_ipv4.address }}-key.pem
+
+
+- name: Create the etcd.service systemd unit file
+  notify: restart etcd
+  template: 
+    src: etcd.service.j2 
+    dest: /etc/systemd/system/etcd.service

@@ -1,0 +1,20 @@
+---
+# Boostrapping the nodes with common stuff. Like wget...
+
+- name: Install wget
+  pacman: 
+    name: wget 
+    state: present
+
+- name: Install Openntpd
+  pacman: 
+    name: openntpd 
+    state: present
+
+- name: Restart Openntpd
+  systemd: 
+    state: restarted 
+    name: openntpd 
+    enabled: yes
+    daemon_reload: yes
+

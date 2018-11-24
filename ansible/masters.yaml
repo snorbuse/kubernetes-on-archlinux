@@ -1,0 +1,8 @@
+---
+# Playbook for installing the Master-nodes for Kubernetes
+
+- hosts: master
+  become: yes
+  roles:
+    - common
+    - etcd
