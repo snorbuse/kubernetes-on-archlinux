@@ -10,6 +10,7 @@
   pacman: 
     name: openntpd 
     state: present
+  register: openntpd
 
 - name: Restart Openntpd
   systemd: 
@@ -17,4 +18,5 @@
     name: openntpd 
     enabled: yes
     daemon_reload: yes
+  when: openntpd.changed == true
 
