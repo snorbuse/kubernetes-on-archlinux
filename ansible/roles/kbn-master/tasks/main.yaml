@@ -76,6 +76,7 @@
     dest: /var/lib/kubernetes
   with_items:
     - rootCA.pem
+    - rootCA-key.pem
     - apiserver-{{ ansible_default_ipv4.address }}.pem
     - apiserver-{{ ansible_default_ipv4.address }}-key.pem
     - serviceaccount.pem
