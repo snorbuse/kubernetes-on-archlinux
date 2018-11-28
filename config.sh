@@ -27,7 +27,7 @@ function createKubelet {
       --user=system:node:${IP} \
       --kubeconfig=$BASEDIR/kubelet-${IP}.kubeconfig
 
-    kubectl config use-context default --kubeconfig=kubelet-${IP}.kubeconfig
+    kubectl config use-context default --kubeconfig=$BASEDIR/kubelet-${IP}.kubeconfig
   done
 }
 
