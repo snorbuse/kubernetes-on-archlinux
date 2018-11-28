@@ -98,20 +98,23 @@ function signCsr {
 
 
 function createCA {
-  info "CA" "Creating CA key"
-  generateKey $CAKEY
+  if [ ! -f $CAFILE ]; then
+    info "CA" "Creating CA key"
+    generateKey $CAKEY
+  fi
 
-  info "CA" "Selfsigning the CA key"
-  openssl req -x509 -new \
-    -nodes \
-    -key $CAKEY \
-    -sha256 \
-    -days 1024 \
-    -out $CA.pem \
-    -subj "/C=US/ST=Oregon/L=Portland/O=Kubernetes/OU=CA/CN=Kubernetes" \
-     2> /dev/null
-
-#    -subj "/C=SE/ST=Sweden/O=Kubernetes/OU=CA/CN=Kubernetes Root CA"\
+  if [ ! -f $CA.pem ]; then
+    info "CA" "Selfsigning the CA key"
+    openssl req -x509 -new \
+      -nodes \
+      -key $CAKEY \
+      -sha256 \
+      -days 1024 \
+      -out $CA.pem \
+      -subj "/C=US/ST=Oregon/L=Portland/O=Kubernetes/OU=CA/CN=Kubernetes" \
+       2> /dev/null
+#      -subj "/C=SE/ST=Sweden/O=Kubernetes/OU=CA/CN=Kubernetes Root CA"\
+  fi
 }
 
 function createKubelet {
@@ -119,16 +122,18 @@ function createKubelet {
     KEY=$KUBELET-$IP-key.pem 
     CSR=$KUBELET-$IP.csr 
 
-    createCNF "subjectAltName = IP: $IP" 
+    if [ ! -f $KEY ]; then
+      createCNF "subjectAltName = IP: $IP" 
 
-    info "KUBELET" "($IP) - Creating private key"
-    generateKey $KEY
+      info "KUBELET" "($IP) - Creating private key"
+      generateKey $KEY
 
-    info "KUBELET" "($IP) - Creating certificate signing request (csr)" 
-    createCsr $KEY $CSR "system:nodes" "Kubernetes The Hard Way" "system:node:$IP"
+      info "KUBELET" "($IP) - Creating certificate signing request (csr)" 
+      createCsr $KEY $CSR "system:nodes" "Kubernetes The Hard Way" "system:node:$IP"
 
-    info "KUBELET" "($IP) - Signing the CRS"
-    signCsr $CSR $KUBELET-$IP.pem 
+      info "KUBELET" "($IP) - Signing the CRS"
+      signCsr $CSR $KUBELET-$IP.pem 
+    fi
   done
 }
 
@@ -137,16 +142,18 @@ function createApiServer {
     KEY=$APISERVER-$IP-key.pem 
     CSR=$APISERVER-$IP.csr 
 
-    createCNF "subjectAltName = DNS: kubernetes.default, IP: 127.0.0.1, IP: $IP" 
+    if [ ! -f $KEY ]; then
+      createCNF "subjectAltName = DNS: kubernetes.default, IP: 127.0.0.1, IP: $IP" 
 
-    info "APISERVER" "($IP) - Creating private key"
-    generateKey $KEY
+      info "APISERVER" "($IP) - Creating private key"
+      generateKey $KEY
 
-    info "APISERVER" "($IP) - Creating certificate signing request (csr)" 
-    createCsr $KEY $CSR "Kubernetes" "Kubernetes The Hard Way" "kubernetes"
+      info "APISERVER" "($IP) - Creating certificate signing request (csr)" 
+      createCsr $KEY $CSR "Kubernetes" "Kubernetes The Hard Way" "kubernetes"
 
-    info "APISERVER" "($IP) - Signing the CRS"
-    signCsr $CSR $APISERVER-$IP.pem 
+      info "APISERVER" "($IP) - Signing the CRS"
+      signCsr $CSR $APISERVER-$IP.pem 
+    fi
   done
 }
 
@@ -164,16 +171,18 @@ function createInfra {
   CERT="$BASEDIR/$file.pem"
   CSR="$BASEDIR/$file.csr"
 
-  createCNF
-  
-  info ${file^^} "Creating private key"
-  generateKey $KEY
+  if [ ! -f $KEY ]; then
+    createCNF
+    
+    info ${file^^} "Creating private key"
+    generateKey $KEY
 
-  info ${file^^} "Creating certificate signing request (csr)" 
-  createCsr $KEY $CSR $o "Kubernetes The Hard Way" $cn
+    info ${file^^} "Creating certificate signing request (csr)" 
+    createCsr $KEY $CSR $o "Kubernetes The Hard Way" $cn
 
-  info ${file^^} "Signing the CRS"
-  signCsr $CSR $CERT  
+    info ${file^^} "Signing the CRS"
+    signCsr $CSR $CERT  
+  fi
 }
 
 function findMasters {
