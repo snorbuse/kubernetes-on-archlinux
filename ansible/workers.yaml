@@ -1,0 +1,8 @@
+---
+# Playbook for installing the Master-nodes for Kubernetes
+
+- hosts: worker
+  become: yes
+  roles:
+    - common
+    - kbn-worker

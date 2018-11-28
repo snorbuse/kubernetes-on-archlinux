@@ -1,0 +1,23 @@
+# Handlers for Kubernetes master
+
+- name: Restart kubelet
+  systemd: 
+    state: restarted 
+    name: kubelet 
+    enabled: yes
+    daemon_reload: yes
+
+- name: Restart kube-proxy
+  systemd: 
+    state: restarted 
+    name: kube-proxy
+    enabled: yes
+    daemon_reload: yes
+
+- name: Restart containerd
+  systemd: 
+    state: restarted 
+    name: containerd 
+    enabled: yes
+    daemon_reload: yes
+

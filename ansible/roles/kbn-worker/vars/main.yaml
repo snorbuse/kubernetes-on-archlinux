@@ -1,0 +1,31 @@
+---
+# Default vars for Etcd
+
+crictl_version: 1.12.0 
+crictl_url: https://github.com/kubernetes-sigs/cri-tools/releases/download/v{{ crictl_version }}/crictl-v{{ crictl_version }}-linux-amd64.tar.gz
+
+runsc_version: 50c283b9f56bb7200938d9e207355f05f79f0d17
+runsc_url: https://storage.googleapis.com/kubernetes-the-hard-way/runsc-{{ runsc_version }}
+
+cni_version: 0.6.0
+cni_url: https://github.com/containernetworking/plugins/releases/download/v0.6.0/cni-plugins-amd64-v{{ cni_version }}.tgz
+
+runc_version: 1.0.0-rc5
+runc_url: https://github.com/opencontainers/runc/releases/download/v{{ runc_version }}/runc.amd64
+
+containerd_version: 1.2.0-rc.0
+containerd_url: https://github.com/containerd/containerd/releases/download/v{{ containerd_version }}/containerd-{{containerd_version}}.linux-amd64.tar.gz
+
+kubernetes_version: 1.12.0
+kubernetes_url: https://storage.googleapis.com/kubernetes-release/release/v{{ kubernetes_version }}/bin/linux/amd64
+
+#  https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.12.0/crictl-v1.12.0-linux-amd64.tar.gz \
+#  https://github.com/containernetworking/plugins/releases/download/v0.6.0/cni-plugins-amd64-v0.6.0.tgz \
+#  https://storage.googleapis.com/kubernetes-release/release/v1.12.0/bin/linux/amd64/kubectl \
+#  https://storage.googleapis.com/kubernetes-release/release/v1.12.0/bin/linux/amd64/kube-proxy \
+#  https://storage.googleapis.com/kubernetes-release/release/v1.12.0/bin/linux/amd64/kubelet
+
+# Installeras via pacman
+#  https://github.com/opencontainers/runc/releases/download/v1.0.0-rc5/runc.amd64 \
+#  https://storage.googleapis.com/kubernetes-the-hard-way/runsc-50c283b9f56bb7200938d9e207355f05f79f0d17 \
+#  https://github.com/containerd/containerd/releases/download/v1.2.0-rc.0/containerd-1.2.0-rc.0.linux-amd64.tar.gz \

@@ -2,3 +2,4 @@
 # Main playbook for installing Kubernetes
 
 - import_playbook: masters.yaml
+- import_playbook: workers.yaml

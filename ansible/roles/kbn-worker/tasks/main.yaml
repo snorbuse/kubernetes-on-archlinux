@@ -1,0 +1,275 @@
+---
+# Boostrapping the Kubernetes worker nodes
+
+- name: Install packages
+  pacman: 
+    name: "{{ item }}" 
+    state: present
+  loop:
+    - socat 
+    - conntrack-tools 
+    - ipset
+
+## Directories
+- name: Create directories
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - /etc/cni/net.d
+    - /opt/cni/bin
+    - /var/lib/kubelet
+    - /var/lib/kube-proxy
+    - /var/lib/kubernetes
+    - /var/run/kubernetes
+    - /etc/containerd
+
+# crictl
+- name: Check if crictl exists
+  stat:
+    path: /usr/local/bin/crictl
+  register: crictl
+
+- name: Download and install crictl
+  unarchive: 
+    src: "{{ crictl_url }}" 
+    remote_src: yes 
+    dest: /usr/local/bin
+  when: crictl.stat.exists == false
+
+# runsc
+- name: Check if runsc exists
+  stat:
+    path: "/usr/local/bin/runsc.{{ runsc_version }}"
+  register: runsc
+
+- name: Download and install runsc
+  get_url: 
+    url: "{{ runsc_url }}" 
+    dest: /usr/local/bin
+    mode: "a+x"
+  when: runsc.stat.exists == false
+
+# runc
+- name: Check if runc exists
+  stat:
+    path: /usr/local/bin/runc.amd64
+  register: runc
+
+- name: Download and install runc
+  get_url: 
+    url: "{{ runc_url }}" 
+    dest: /usr/local/bin
+    mode: "a+x"
+  when: runc.stat.exists == false
+
+# cni
+- name: Check if CNI is installed
+  stat:
+    path: /opt/cni/bin/bridge
+  register: cni
+
+- name: Download and install CNI
+  unarchive: 
+    src: "{{ cni_url }}" 
+    remote_src: yes 
+    dest: /opt/cni/bin
+  when: cni.stat.exists == false
+
+# containerd
+- name: Check if containerd exists
+  stat:
+    path: /bin/containerd
+  register: containerd
+
+- name: Create tmp directory for containerd
+  file:
+    path: /tmp/containerd
+    state: directory
+  when: containerd.stat.exists == false
+
+- name: Download containerd
+  unarchive: 
+    src: "{{ containerd_url }}" 
+    remote_src: yes 
+    dest: /tmp/containerd/
+  when: containerd.stat.exists == false
+
+- name: Install containerd
+  command: "mv /tmp/containerd/bin/{{ item }} /bin/{{ item }}"
+  when: containerd.stat.exists == false
+  loop:
+    - containerd
+    - containerd-release
+    - containerd-shim
+    - containerd-shim-runc-v1
+    - containerd-stress
+    - ctr
+
+
+#- name: Check if dependencies is installed
+#  stat: 
+#    path: "{{ item.file }}"
+#  register: dependencies
+#  loop:
+#    - dest: /usr/local/bin
+#      file: /usr/local/bin/crictl
+#      url: "{{ crictl_url }}}"
+#    - dest: /usr/local/bin
+#      file: "/usr/local/bin/runsc.{{ runsc_version }}"
+#      url: "{{ runsc_url }}}"
+#    - dest: /usr/local/bin
+#      file: /usr/local/bin/runc.amd64
+#      url: "{{ runc_url }}}"
+#    - dest: /opt/cni/bin
+#      file: /opt/cni/bin/bridge
+#      url: "{{ cni_url }}}"
+#    - dest: /bin/containerd
+#      file: /
+#      url: "{{ containerd_url }}}"
+#
+#- name: Download and install dependencies
+#  unarchive:
+#    src: "{{ item.item.url }}"
+#    remote_src: true
+#    dest: "{{ item.item.dest }}"
+#  when: item.stat.exists == false
+#  loop_control:
+#    label: "{{ item.item.url }}"
+#  loop: "{{ dependencies.results }}"
+  
+
+
+
+
+
+
+
+## Kubernetes
+- name: Check if kubelet exists
+  stat:
+    path: /usr/local/bin/kubelet
+  register: kubelet
+
+- name: Check if kube-proxy exists
+  stat:
+    path: /usr/local/bin/kube-proxy
+  register: proxy
+
+
+# Download and install
+
+- name: Download and install kubelet
+  get_url:
+    url: "{{ kubernetes_url}}/kubelet"
+    dest: /usr/local/bin
+    mode: "a+x"
+  when: kubelet.stat.exists == false
+
+- name: Download and install kube-proxy
+  get_url:
+    url: "{{ kubernetes_url}}/kube-proxy"
+    dest: /usr/local/bin
+    mode: "a+x"
+  when: proxy.stat.exists == false
+
+
+## Config
+
+- name: Create network configurations
+  copy:
+    src: "{{ item }}"
+    dest: /etc/cni/net.d/
+  loop:
+    - 10-bridge.conf
+    - 99-loopback.conf
+
+- name: Create containerd configurations
+  notify: Restart containerd
+  copy:
+    src: config.toml
+    dest: /etc/containerd/
+
+- name: Copy kubeconfig configuration
+  notify: Restart kubelet
+  copy: 
+    src: "{{ config_dir }}/kubelet-{{ ansible_default_ipv4.address }}.kubeconfig" 
+    dest: /var/lib/kubelet/kubeconfig
+
+- name: Copy kube-proxy.kubeconfig
+  copy: 
+    src: "{{ config_dir }}/kube-proxy.kubeconfig" 
+    dest: /var/lib/kube-proxy/kubeconfig
+
+- name: Create kube-proxy-config.yaml configuration
+  notify: Restart kube-proxy
+  copy: 
+    src: kube-proxy-config.yaml
+    dest: /var/lib/kube-proxy/
+
+- name: Create kubelet-config.yaml configuration
+  notify: Restart kubelet
+  template: 
+    src: kubelet-config.yaml.j2
+    dest: /var/lib/kubelet/kubelet-config.yaml
+ 
+# Certificate
+
+- name: Copy certificates
+  notify: Restart kubelet
+  copy: 
+    src: "{{ cert_dir }}/{{ item }}" 
+    dest: /var/lib/kubernetes
+  with_items:
+    - rootCA.pem
+    - kubelet-{{ ansible_default_ipv4.address }}.pem
+    - kubelet-{{ ansible_default_ipv4.address }}-key.pem
+
+
+## Systemd
+
+- name: Create the containerd.service systemd unit file
+  template: 
+    src: containerd.service.j2
+    dest: /etc/systemd/system/containerd.service
+  register: containerd_service
+
+- name: Create the kubelet.service systemd unit file
+  notify: Restart kubelet
+  template: 
+    src: kubelet.service.j2
+    dest: /etc/systemd/system/kubelet.service
+  register: kubelet_serivce
+
+- name: Create the kube-proxy.service systemd unit file
+  notify: Restart kube-proxy
+  template: 
+    src: kube-proxy.service.j2
+    dest: /etc/systemd/system/kube-proxy.service
+  register: proxy_service
+
+- name: Start containerd
+  systemd: 
+    name: containerd
+    state: started 
+    enabled: yes
+    daemon_reload: yes
+  when: containerd_service.changed == false
+  register: cont_foobar
+
+- name: Start kubelet
+  systemd: 
+    name: kubelet
+    state: started 
+    enabled: yes
+    daemon_reload: yes
+  when: kubelet_serivce.changed == false
+
+- name: Start kube-proxy
+  systemd: 
+    name: kube-proxy
+    state: started 
+    enabled: yes
+    daemon_reload: yes
+  when: proxy_service.changed == false
+
