@@ -3,7 +3,6 @@
 BASEDIR="configuration"
 CERTDIR="certificate"
 # The IP of the master(s)
-PUBLIC_ADDRESS="192.168.1.66"
 
 if [ ! -d $BASEDIR ]; then
   mkdir -p $BASEDIR
@@ -143,6 +142,8 @@ function findMasters {
 function findWorkers {
   grep -A 100 \\[worker\\] ansible/hosts | grep --color=auto -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b"
 }
+
+PUBLIC_ADDRESS=$(findMasters | head -n 1)
 
 for IP in `findWorkers`; do
   createKubelet $IP
